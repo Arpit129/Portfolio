@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arpit Tiwari – Video Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0e;
+    --surface: #141417;
+    --card: #1a1a1f;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #f0ede8;
+    --muted: #7a7880;
+    --border: #2a2a30;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 8vw 60px;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: 'VE';
+    position: absolute;
+    right: -2vw;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(200px, 28vw, 400px);
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(232, 255, 71, 0.07);
+    pointer-events: none;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-label::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(60px, 10vw, 130px);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 32px;
+  }
+  h1 span { color: var(--accent); }
+
+  .hero-bio {
+    max-width: 520px;
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 40px;
+  }
+
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 60px;
+  }
+  .hero-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .hero-links a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .hero-links a.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0c0c0e;
+    font-weight: 500;
+  }
+  .hero-links a.primary:hover {
+    background: transparent;
+    color: var(--accent);
+  }
+
+  .scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .scroll-hint span {
+    display: inline-block;
+    width: 1px;
+    height: 40px;
+    background: var(--muted);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(0.5); }
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    position: relative;
+    padding: 80px 8vw;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  h2 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(36px, 5vw, 64px);
+    letter-spacing: 0.03em;
+    line-height: 1;
+    margin-bottom: 48px;
+  }
+
+  /* ── SKILLS ── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2px;
+  }
+
+  .skill-block {
+    background: var(--card);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .skill-block:hover::before { transform: scaleX(1); }
+
+  .skill-block h3 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .skill-tag-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .skill-tag-list li {
+    font-size: 12px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .skill-tag-list li:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  /* ── PROJECTS ── */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2px;
+  }
+
+  .project-card {
+    background: var(--card);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    transition: background 0.3s;
+  }
+  .project-card:hover { background: #1f1f26; }
+
+  .project-num {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 80px;
+    color: rgba(232, 255, 71, 0.06);
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .project-date {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 16px;
+  }
+
+  .project-card h3 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .project-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .project-card ul li {
+    font-size: 13px;
+    color: var(--muted);
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.6;
+  }
+  .project-card ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 11px;
+  }
+
+  /* ── EDUCATION ── */
+  .edu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .edu-item {
+    background: var(--card);
+    padding: 28px 36px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: start;
+    transition: background 0.2s;
+  }
+  .edu-item:hover { background: #1f1f26; }
+  .edu-item h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .edu-item p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .edu-meta {
+    text-align: right;
+  }
+  .edu-meta .year {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .edu-meta .grade {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 24px;
+    color: var(--text);
+  }
+
+  /* ── AWARDS ── */
+  .awards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .award-item {
+    background: var(--card);
+    padding: 28px 36px;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    transition: background 0.2s;
+  }
+  .award-item:hover { background: #1f1f26; }
+  .award-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .award-item h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .award-item p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── LEADERSHIP ── */
+  .leadership-card {
+    background: var(--card);
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .leadership-card::before {
+    content: 'VP';
+    font-family: 'Bebas Neue', cursive;
+    font-size: 200px;
+    position: absolute;
+    right: -10px;
+    bottom: -20px;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(232, 255, 71, 0.05);
+    pointer-events: none;
+    line-height: 1;
+  }
+  .leadership-card .role {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .leadership-card h3 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 36px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .leadership-card .org {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .leadership-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .leadership-card ul li {
+    font-size: 14px;
+    color: var(--muted);
+    padding-left: 20px;
+    position: relative;
+  }
+  .leadership-card ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 11px;
+  }
+
+  /* ── CONTACT / FOOTER ── */
+  .footer {
+    background: var(--surface);
+    padding: 80px 8vw 48px;
+    border-top: 1px solid var(--border);
+  }
+  .footer h2 {
+    margin-bottom: 12px;
+  }
+  .footer-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 48px;
+  }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2px;
+    margin-bottom: 60px;
+  }
+  .contact-item {
+    background: var(--card);
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .contact-item:hover { background: #1f1f26; }
+  .contact-item .c-label {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .contact-item .c-val {
+    font-size: 14px;
+    color: var(--text);
+  }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-bottom p {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #4ade80;
+    letter-spacing: 0.05em;
+  }
+  .status-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 60px 6vw 48px; }
+    section { padding: 60px 6vw; }
+    .edu-item { grid-template-columns: 1fr; }
+    .edu-meta { text-align: left; }
+    .footer { padding: 60px 6vw 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-label">Available for Internships</div>
+  <h1>Arpit<br><span>Tiwari</span></h1>
+  <p class="hero-bio">
+    Beginner video editor & Computer Science undergraduate with a creative eye for storytelling. 
+    Combining technical aptitude with artistic curiosity to produce engaging visual content.
+  </p>
+  <div class="hero-links">
+    <a href="mailto:arpittiwari1392@gmail.com" class="primary">✉ Get in touch</a>
+    <a href="tel:+919471309460">📞 +91 94713 09460</a>
+    <a href="https://www.linkedin.com/in/arpit-tiwari-30590a396" target="_blank">in LinkedIn</a>
+  </div>
+  <div class="scroll-hint"><span></span> Scroll to explore</div>
+</header>
+
+<!-- SKILLS -->
+<section>
+  <div class="section-label">What I bring</div>
+  <h2>Skills</h2>
+  <div class="skills-grid">
+    <div class="skill-block fade-in">
+      <h3>🎬 Video Editing</h3>
+      <ul class="skill-tag-list">
+        <li>Cuts & Transitions</li>
+        <li>Colour Grading</li>
+        <li>Motion Graphics</li>
+        <li>Audio Sync</li>
+        <li>Sound Design</li>
+        <li>Storytelling</li>
+        <li>Pacing</li>
+      </ul>
+    </div>
+    <div class="skill-block fade-in">
+      <h3>🛠 Tools</h3>
+      <ul class="skill-tag-list">
+        <li>DaVinci Resolve</li>
+        <li>CapCut</li>
+        <li>Python</li>
+        <li>C++</li>
+        <li>Tableau</li>
+      </ul>
+    </div>
+    <div class="skill-block fade-in">
+      <h3>📊 Data & Analytics</h3>
+      <ul class="skill-tag-list">
+        <li>NumPy</li>
+        <li>Pandas</li>
+        <li>Matplotlib</li>
+        <li>Data Cleaning</li>
+        <li>EDA</li>
+        <li>Insight Generation</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section>
+  <div class="section-label">What I've built</div>
+  <h2>Projects</h2>
+  <div class="projects-grid">
+    <div class="project-card fade-in">
+      <div class="project-num">01</div>
+      <div class="project-date">Ongoing</div>
+      <h3>Video Portfolio</h3>
+      <ul>
+        <li>Personal editing projects showcasing beginner-to-intermediate techniques</li>
+        <li>Short-form content, montages, and event reels</li>
+        <li>Colour grading and sound design applied throughout</li>
+      </ul>
+    </div>
+    <div class="project-card fade-in">
+      <div class="project-num">02</div>
+      <div class="project-date">March 2026</div>
+      <h3>Global Air Pollution Analysis</h3>
+      <ul>
+        <li>Analysed PM2.5 & AQI datasets using Python (NumPy, Pandas, Matplotlib)</li>
+        <li>Identified regional pollution spikes and temporal trends over five years</li>
+        <li>Built interactive data visualisations and summary dashboards</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section>
+  <div class="section-label">My background</div>
+  <h2>Education</h2>
+  <div class="edu-list">
+    <div class="edu-item fade-in">
+      <div>
+        <h3>B.Sc. Physical Science with Computer Science</h3>
+        <p>Shivaji College, University of Delhi</p>
+      </div>
+      <div class="edu-meta">
+        <div class="year">2024 – Present</div>
+        <div class="grade">8.5 / 10</div>
+      </div>
+    </div>
+    <div class="edu-item fade-in">
+      <div>
+        <h3>Class XII</h3>
+        <p>M.J.R.P Academy, Uttar Pradesh</p>
+      </div>
+      <div class="edu-meta">
+        <div class="year">Passed 2024</div>
+        <div class="grade">76.4%</div>
+      </div>
+    </div>
+    <div class="edu-item fade-in">
+      <div>
+        <h3>Class X</h3>
+        <p>M.J.R.P Academy, Uttar Pradesh</p>
+      </div>
+      <div class="edu-meta">
+        <div class="year">Passed 2022</div>
+        <div class="grade">84.8%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERSHIP -->
+<section>
+  <div class="section-label">Leadership</div>
+  <h2>Responsibility</h2>
+  <div class="leadership-card fade-in">
+    <div class="role">Vice President</div>
+    <h3>WEBSTERS – CS Society</h3>
+    <p class="org">Shivaji College, University of Delhi</p>
+    <ul>
+      <li>Led technical and creative initiatives for the college's flagship CS society</li>
+      <li>Organised workshops, hackathons, and inter-college events including a Tableau workshop</li>
+      <li>Collaborated with the Placement & Internship Cell and Skill Development Centre</li>
+      <li>Managed a team of student volunteers and coordinated society operations</li>
+    </ul>
+  </div>
+</section>
+
+<!-- AWARDS -->
+<section>
+  <div class="section-label">Recognition</div>
+  <h2>Awards & Certs</h2>
+  <div class="awards-list">
+    <div class="award-item fade-in">
+      <div class="award-icon">🏆</div>
+      <div>
+        <h3>Academic Topper Award – 65th Annual Day, Shivaji College</h3>
+        <p>Recognised for outstanding academic performance with the highest CGPA in the department.</p>
+      </div>
+    </div>
+    <div class="award-item fade-in">
+      <div class="award-icon">📜</div>
+      <div>
+        <h3>Tableau Workshop Certificate – Coursera, 2025</h3>
+        <p>2-day hands-on data visualisation workshop organised by WEBSTERS in collaboration with the Placement & Internship Cell.</p>
+      </div>
+    </div>
+    <div class="award-item fade-in">
+      <div class="award-icon">🤖</div>
+      <div>
+        <h3>Bootcamp on AI & Python – 2025</h3>
+        <p>Introduction to NumPy, Pandas, Matplotlib and foundational deep learning models.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / CONTACT -->
+<footer class="footer">
+  <div class="section-label">Let's work together</div>
+  <h2>Contact</h2>
+  <p class="footer-sub">Open to video editing internships, collaborations on event reels, short-form content, and creative projects.</p>
+  <div class="contact-grid">
+    <a class="contact-item" href="mailto:arpittiwari1392@gmail.com">
+      <span class="c-label">Email</span>
+      <span class="c-val">arpittiwari1392@gmail.com</span>
+    </a>
+    <a class="contact-item" href="tel:+919471309460">
+      <span class="c-label">Phone</span>
+      <span class="c-val">+91 94713 09460</span>
+    </a>
+    <a class="contact-item" href="https://www.linkedin.com/in/arpit-tiwari-30590a396" target="_blank">
+      <span class="c-label">LinkedIn</span>
+      <span class="c-val">linkedin.com/in/arpit-tiwari</span>
+    </a>
+    <a class="contact-item" href="#">
+      <span class="c-label">Portfolio</span>
+      <span class="c-val">your-portfolio-link</span>
+    </a>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Arpit Tiwari — Video Editor & CS Undergraduate</p>
+    <span class="status-dot">Available for work</span>
+  </div>
+</footer>
+
+<script>
+  // Intersection observer for fade-in animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
